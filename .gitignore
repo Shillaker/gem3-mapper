@@ -4,4 +4,5 @@ Makefile.mk
 
 config.log
 config.status
+build/
 
