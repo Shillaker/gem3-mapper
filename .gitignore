@@ -1,3 +1,7 @@
 Makefile.mk
 .project
 .cproject
+
+config.log
+config.status
+
