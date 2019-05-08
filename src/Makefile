@@ -35,6 +35,7 @@ SUBDIRS=align \
         archive \
         filtering \
         fm_index \
+		gpu \
         io \
         mapper \
         matches \
