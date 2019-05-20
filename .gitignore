@@ -2,6 +2,15 @@ Makefile.mk
 .project
 .cproject
 
+bin/
+
+# Genomics data
+*.fasta
+*.fa
+*.fna
+*.info
+*.gem
+
 config.log
 config.status
 build/
