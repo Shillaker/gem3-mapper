@@ -22,7 +22,7 @@ export RANLIB=${EMCC_BIN}/llvm-ranlib
 export SYSROOT=${EMCC_ROOT}/sysroot
 export LDSHARED=${EMCC_BIN}/wasm-ld
 
-./configure --enable-lto=no --enable-cuda=no --host=${WASM_TRIPLE} --build=${WASM_BUILD}
+./configure --enable-cuda=no --host=${WASM_TRIPLE} --build=${WASM_BUILD}
 
 make
 
