@@ -4,8 +4,8 @@ set -e
 
 EMCC_WASM_BACKEND=1
 
-FAASM_ROOT=/usr/local/code/faasm
-EMCC_ROOT=${FAASM_ROOT}/pyodide/emsdk/emsdk/upstream/latest
+FAASM_ROOT=/usr/local/faasm
+EMCC_ROOT=${FAASM_ROOT}/emsdk/upstream/latest
 EMCC_BIN=${EMCC_ROOT}/bin
 
 WASM_TRIPLE=wasm32-unknown-wasm
