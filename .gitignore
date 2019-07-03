@@ -7,6 +7,7 @@ bin/
 # Genomics data
 *.fasta
 *.fa
+*.fq
 *.fna
 *.info
 *.gem
