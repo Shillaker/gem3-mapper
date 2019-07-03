@@ -11,6 +11,7 @@ bin/
 *.fna
 *.info
 *.gem
+*.sam
 
 config.log
 config.status
