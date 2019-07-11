@@ -329,13 +329,13 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
         "CPU-index can achieve better performance "
         "(gem-indexer --gpu-index=false)");
   }
-  // Setup threads
-  const uint64_t num_threads = mapper_parameters->system.num_threads;
-  mapper_search_t* const mapper_search = mm_calloc(num_threads,mapper_search_t,false);
+
   // Set error-report function
-  g_mapper_searches = mapper_search;
+  // Note that the global reference to mapper_searches doesn't work in the Faasm context
+  g_mapper_searches = NULL;
   MUTEX_INIT(mapper_parameters->error_report_mutex);
   gem_error_set_report_function(mapper_error_report);
+
   // Prepare output file/parameters (SAM headers)
   archive_t* const archive = mapper_parameters->archive;
   const bool bisulfite_index = (archive->type == archive_dna_bisulfite);
@@ -345,6 +345,7 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
         mapper_parameters->argc,mapper_parameters->argv,mapper_parameters->gem_version);
     mapper_parameters->io.sam_parameters.bisulfite_output = bisulfite_index;
   }
+
   // Setup Ticker
   ticker_t ticker;
   ticker_count_reset(&ticker,mapper_parameters->misc.verbose_user,
@@ -353,9 +354,15 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
   ticker_add_process_label(&ticker,"#","sequences processed");
   ticker_add_finish_label(&ticker,"Total","sequences processed");
   ticker_mutex_enable(&ticker);
-	// Allocate per thread mapping stats
+
+  // Allocate per thread mapping stats
+  const uint64_t num_threads = mapper_parameters->system.num_threads;
+  mapper_search_t* const mapper_search = mm_calloc(num_threads,mapper_search_t,false);
+
+  // Global mapping stats here is null by default
   mapping_stats_t* const mstats = mapper_parameters->global_mapping_stats ?
       mm_calloc(num_threads,mapping_stats_t,false) : NULL;
+
   // Launch threads
   PROF_START(GP_MAPPER_MAPPING);
 
