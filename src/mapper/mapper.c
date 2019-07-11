@@ -24,6 +24,8 @@
  *   the standard mapper workflow (SE/PE)
  */
 
+#include <faasm/faasm.h>
+
 #include "mapper/mapper.h"
 #include "mapper/mapper_io.h"
 #include "archive/search/archive_search_se.h"
@@ -46,7 +48,7 @@
  * Error Report
  */
 mapper_search_t* g_mapper_searches; // Global searches on going
-pthread_mutex_t mapper_error_report_mutex = PTHREAD_MUTEX_INITIALIZER;
+// pthread_mutex_t mapper_error_report_mutex = PTHREAD_MUTEX_INITIALIZER;
 void mapper_error_report_cmd(
     FILE* stream,
     mapper_parameters_t* const mapper_parameters) {
@@ -141,7 +143,8 @@ void mapper_error_report(FILE* stream) {
 /*
  * SE Mapper
  */
-void* mapper_se_thread(mapper_search_t* const mapper_search) {
+// void* mapper_se_thread(mapper_search_t* const mapper_search) {
+FAASM_FUNC(mapper_se_thread, 1) {
   // GEM-thread error handler
   gem_thread_register_id(mapper_search->thread_id+1);
 
@@ -213,12 +216,14 @@ void* mapper_se_thread(mapper_search_t* const mapper_search) {
   archive_search_delete(archive_search);
   archive_search_handlers_delete(archive_search_handlers);
   mapper_io_handler_delete(mapper_io_handler);
-  pthread_exit(0);
+  // pthread_exit(0);
 }
+
 /*
  * PE Mapper
  */
-void* mapper_pe_thread(mapper_search_t* const mapper_search) {
+// void* mapper_pe_thread(mapper_search_t* const mapper_search) {
+FAASM_FUNC(mapper_pe_thread, 2) {
   // GEM-thread error handler
   gem_thread_register_id(mapper_search->thread_id+1);
 
@@ -304,7 +309,7 @@ void* mapper_pe_thread(mapper_search_t* const mapper_search) {
   paired_matches_delete(paired_matches);
   archive_search_handlers_delete(archive_search_handlers);
   mapper_io_handler_delete(mapper_io_handler);
-  pthread_exit(0);
+  // pthread_exit(0);
 }
 /*
  * SE/PE runnable
@@ -353,16 +358,25 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
       mm_calloc(num_threads,mapping_stats_t,false) : NULL;
   // Launch threads
   PROF_START(GP_MAPPER_MAPPING);
-  pthread_handler_t mapper_thread;
+
+  // pthread_handler_t mapper_thread;
+  int faasmFuncIdx;
   if (paired_end) {
-    mapper_thread = (pthread_handler_t) mapper_pe_thread;
+    //    --- REPLACING ---
+    // mapper_thread = (pthread_handler_t) mapper_pe_thread;
+    faasmFuncIdx = 2;
   } else {
-    mapper_thread = (pthread_handler_t) mapper_se_thread;
+    //    --- REPLACING ---
+    // mapper_thread = (pthread_handler_t) mapper_se_thread;
+    faasmFuncIdx = 1;
   }
+
   uint64_t i;
+  int *faasmCallIds = malloc(num_threads * sizeof(int));
   PROFILE_VTUNE_START(); // Vtune
   for (i=0;i<num_threads;++i) {
     // Setup thread
+    // TODO - dish these out into shared Faasm state
     mapper_search[i].thread_id = i;
     mapper_search[i].thread_data = mm_alloc(pthread_t);
     mapper_search[i].mapper_parameters = mapper_parameters;
@@ -373,16 +387,21 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
 		} else {
 		  mapper_search[i].mapping_stats = NULL;
 		}
-    // Launch thread
-    gem_cond_fatal_error(
-        pthread_create(mapper_search[i].thread_data,0,
-            mapper_thread,(void*)(mapper_search+i)),SYS_THREAD_CREATE);
+
+    // Chain function
+    //    --- REPLACING ---
+    //    gem_cond_fatal_error(
+    //        pthread_create(mapper_search[i].thread_data,0,
+    //            mapper_thread,(void*)(mapper_search+i)),SYS_THREAD_CREATE);
+    int faasmCallId = faasmChainThis(faasmFuncIdx);
+    faasmCallIds[i] = faasmCallId;
   }
   // Join all threads
   for (i=0;i<num_threads;++i) {
-    gem_cond_fatal_error(pthread_join(*(mapper_search[i].thread_data),0),SYS_THREAD_JOIN);
+    faasmAwaitCall(faasmCallIds[i]);
     mm_free(mapper_search[i].thread_data);
   }
+
   PROFILE_VTUNE_STOP(); // Vtune
   ticker_finish(&ticker);
   ticker_mutex_cleanup(&ticker);

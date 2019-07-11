@@ -24,7 +24,6 @@
 # Definitions
 ROOT_PATH=$(CURDIR)
 include Makefile.mk
-include Makefile.envs
 
 all: release
 

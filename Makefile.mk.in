@@ -191,11 +191,11 @@ endif
 # Library Flags
 ###############################################################################
 # Libs/Include Flags
-PATH_INCLUDE=-I$(FOLDER_INCLUDE)
-PATH_LIB=-L$(FOLDER_LIB)
+PATH_INCLUDE=-I$(FOLDER_INCLUDE) -I/usr/local/faasm/install/include
+PATH_LIB=-L$(FOLDER_LIB) -L/usr/local/faasm/install/lib
 
 # Link Libs
-LIBS=-lpthread -lm $(LIBS_ZLIB) $(LIBS_BZLIB)
+LIBS=-lfaasm -lm $(LIBS_ZLIB) $(LIBS_BZLIB)
 ifeq ($(PLATFORM),Linux)
   LIBS+=-lrt
 endif
