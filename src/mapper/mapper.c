@@ -140,11 +140,40 @@ void mapper_error_report(FILE* stream) {
     } MUTEX_END_SECTION(mapper_parameters->error_report_mutex);
   }
 }
+
+
+void write_mapper_search_to_state(mapper_search_t *ms, int idx) {
+    char state_key[18];
+    snprintf(state_key, 18, "mapper_search_%d", idx);
+    size_t n_bytes = sizeof(mapper_search_t);
+    faasmWriteState(state_key, (unsigned char *)ms, n_bytes, 0);
+}
+
+mapper_search_t* read_mapper_search_from_state(int idx) {
+    char state_key[18];
+    snprintf(state_key, 18, "mapper_search_%d", idx);
+    size_t n_bytes = sizeof(mapper_search_t);
+
+    mapper_search_t *ms = (mapper_search_t*) malloc(n_bytes);
+    faasmReadState(state_key, (unsigned char *)ms, n_bytes, 0);
+    return ms;
+}
+
+int read_faasm_func_input() {
+    int res = 0;
+    faasmReadInput((unsigned char*)&res, sizeof(int));
+    return res;
+}
+
 /*
  * SE Mapper
  */
 // void* mapper_se_thread(mapper_search_t* const mapper_search) {
 FAASM_FUNC(mapper_se_thread, 1) {
+  // Read input to see which function this is
+  int idx = read_faasm_func_input();
+  mapper_search_t *mapper_search = read_mapper_search_from_state(idx);
+
   // GEM-thread error handler
   gem_thread_register_id(mapper_search->thread_id+1);
 
@@ -224,6 +253,10 @@ FAASM_FUNC(mapper_se_thread, 1) {
  */
 // void* mapper_pe_thread(mapper_search_t* const mapper_search) {
 FAASM_FUNC(mapper_pe_thread, 2) {
+  // Read input to see which function this is
+  int idx = read_faasm_func_input();
+  mapper_search_t *mapper_search = read_mapper_search_from_state(idx);
+
   // GEM-thread error handler
   gem_thread_register_id(mapper_search->thread_id+1);
 
@@ -309,8 +342,8 @@ FAASM_FUNC(mapper_pe_thread, 2) {
   paired_matches_delete(paired_matches);
   archive_search_handlers_delete(archive_search_handlers);
   mapper_io_handler_delete(mapper_io_handler);
-  // pthread_exit(0);
 }
+
 /*
  * SE/PE runnable
  */
@@ -355,58 +388,44 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
   ticker_add_finish_label(&ticker,"Total","sequences processed");
   ticker_mutex_enable(&ticker);
 
-  // Allocate per thread mapping stats
-  const uint64_t num_threads = mapper_parameters->system.num_threads;
-  mapper_search_t* const mapper_search = mm_calloc(num_threads,mapper_search_t,false);
-
   // Global mapping stats here is null by default
-  mapping_stats_t* const mstats = mapper_parameters->global_mapping_stats ?
-      mm_calloc(num_threads,mapping_stats_t,false) : NULL;
+  mapping_stats_t* const mstats = NULL;
 
-  // Launch threads
   PROF_START(GP_MAPPER_MAPPING);
 
   // pthread_handler_t mapper_thread;
   int faasmFuncIdx;
   if (paired_end) {
-    //    --- REPLACING ---
-    // mapper_thread = (pthread_handler_t) mapper_pe_thread;
     faasmFuncIdx = 2;
   } else {
-    //    --- REPLACING ---
-    // mapper_thread = (pthread_handler_t) mapper_se_thread;
     faasmFuncIdx = 1;
   }
 
-  uint64_t i;
-  int *faasmCallIds = malloc(num_threads * sizeof(int));
   PROFILE_VTUNE_START(); // Vtune
+
+  // Allocate per thread mapping stats
+  uint64_t i;
+  const uint64_t num_threads = mapper_parameters->system.num_threads;
+  int *faasmCallIds = malloc(num_threads * sizeof(int));
+
   for (i=0;i<num_threads;++i) {
-    // Setup thread
-    // TODO - dish these out into shared Faasm state
-    mapper_search[i].thread_id = i;
-    mapper_search[i].thread_data = mm_alloc(pthread_t);
-    mapper_search[i].mapper_parameters = mapper_parameters;
-    mapper_search[i].ticker = &ticker;
-		if (mstats)	{
-			 mapper_search[i].mapping_stats = mstats + i;
-			 init_mapping_stats(mstats + i);
-		} else {
-		  mapper_search[i].mapping_stats = NULL;
-		}
+    // Set up worker params
+    mapper_search_t ms;
+    ms.thread_id = i;
+    ms.thread_data = mm_alloc(pthread_t);
+    ms.mapper_parameters = mapper_parameters;
+    ms.ticker = &ticker;
+    ms.mapping_stats = NULL;
+
+    write_mapper_search_to_state(&ms, i);
 
     // Chain function
-    //    --- REPLACING ---
-    //    gem_cond_fatal_error(
-    //        pthread_create(mapper_search[i].thread_data,0,
-    //            mapper_thread,(void*)(mapper_search+i)),SYS_THREAD_CREATE);
     int faasmCallId = faasmChainThis(faasmFuncIdx);
     faasmCallIds[i] = faasmCallId;
   }
   // Join all threads
   for (i=0;i<num_threads;++i) {
     faasmAwaitCall(faasmCallIds[i]);
-    mm_free(mapper_search[i].thread_data);
   }
 
   PROFILE_VTUNE_STOP(); // Vtune
@@ -420,7 +439,6 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
 	}
   // Clean up
 	MUTEX_DESTROY(mapper_parameters->error_report_mutex);
-  mm_free(mapper_search);
 }
 void mapper_se_run(mapper_parameters_t* const mapper_parameters) {
   mapper_run(mapper_parameters,false);
