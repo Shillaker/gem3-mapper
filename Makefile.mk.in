@@ -191,11 +191,21 @@ endif
 # Library Flags
 ###############################################################################
 # Libs/Include Flags
-PATH_INCLUDE=-I$(FOLDER_INCLUDE) -I/usr/local/faasm/install/include
-PATH_LIB=-L$(FOLDER_LIB) -L/usr/local/faasm/install/lib
+PATH_INCLUDE=-I$(FOLDER_INCLUDE)
+PATH_LIB=-L$(FOLDER_LIB)
 
 # Link Libs
 LIBS=-lfaasm -lm $(LIBS_ZLIB) $(LIBS_BZLIB)
+ifeq ($(WASM_BUILD), 1)
+else
+  # Include pthread in native
+  LIBS+=-lpthread
+
+  # Add native Faasm libs
+  PATH_INCLUDE+=-I/usr/local/faasm/install/include
+  PATH_LIB+=-L/usr/local/faasm/install/lib
+endif
+
 ifeq ($(PLATFORM),Linux)
   LIBS+=-lrt
 endif
