@@ -161,7 +161,7 @@ mapper_search_t* read_mapper_search_from_state(int idx) {
 
 int read_faasm_func_input() {
     int res = 0;
-    faasmReadInput((unsigned char*)&res, sizeof(int));
+    faasmGetInput((unsigned char*)&res, sizeof(int));
     return res;
 }
 

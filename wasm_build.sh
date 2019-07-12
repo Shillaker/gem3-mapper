@@ -9,7 +9,7 @@ EMCC_ROOT=${FAASM_ROOT}/emsdk/upstream/latest
 EMCC_BIN=${EMCC_ROOT}/bin
 
 WASM_TRIPLE=wasm32-unknown-wasm
-WASM_BUILD=wasm32
+WASM_BUILD_TYPE=wasm32
 WASM_SYSROOT=${EMCC_ROOT}/sysroot
 
 export CFLAGS="--sysroot=${WASM_SYSROOT}"
@@ -22,6 +22,6 @@ export RANLIB=${EMCC_BIN}/llvm-ranlib
 export SYSROOT=${EMCC_ROOT}/sysroot
 export LDSHARED=${EMCC_BIN}/wasm-ld
 
-./configure --enable-cuda=no --disable-lto --without-tests --host=${WASM_TRIPLE} --build=${WASM_BUILD}
+WASM_BUILD=1 ./configure --enable-cuda=no --disable-lto --without-tests --host=${WASM_TRIPLE} --build=${WASM_BUILD_TYPE}
 
 make
