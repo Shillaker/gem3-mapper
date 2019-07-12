@@ -168,7 +168,6 @@ int read_faasm_func_input() {
 /*
  * SE Mapper
  */
-// void* mapper_se_thread(mapper_search_t* const mapper_search) {
 FAASM_FUNC(mapper_se_thread, 1) {
   // Read input to see which function this is
   int idx = read_faasm_func_input();
@@ -253,7 +252,6 @@ FAASM_FUNC(mapper_se_thread, 1) {
 /*
  * PE Mapper
  */
-// void* mapper_pe_thread(mapper_search_t* const mapper_search) {
 FAASM_FUNC(mapper_pe_thread, 2) {
   // Read input to see which function this is
   int idx = read_faasm_func_input();

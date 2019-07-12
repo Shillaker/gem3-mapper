@@ -25,6 +25,8 @@
 #define REPORT_H_
 
 #include "system/commons.h"
+#include <time.h>
+#include <pthread.h>
 
 // Labels
 #define GEM_LABEL_ERROR "GEM::Error"
