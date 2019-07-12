@@ -24,7 +24,7 @@
  *   the standard mapper workflow (SE/PE)
  */
 
-#include <faasm/faasm.h>
+#include <faasm/core.h>
 
 #include "mapper/mapper.h"
 #include "mapper/mapper_io.h"

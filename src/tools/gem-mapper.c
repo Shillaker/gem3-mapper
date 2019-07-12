@@ -185,7 +185,13 @@ FAASM_MAIN_FUNC() {
   // Parsing command-line options
   mapper_parameters_t parameters;
   mapper_parameters_set_defaults(&parameters); // Set defaults
-  gem_mapper_parse_arguments(argc,argv,&parameters,gem_version); // Parse cmd-line
+
+  // Fake command-line arguments here
+  int argc = 1;
+  char* argv[] = {
+      "gem-mapper.c",
+  };
+  gem_mapper_parse_arguments(argc,argv,&parameters,gem_version);
 
   // Runtime setup
   const mapper_parameters_cuda_t* const cuda = &parameters.cuda;
