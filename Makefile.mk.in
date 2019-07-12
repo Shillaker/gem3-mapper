@@ -195,7 +195,7 @@ PATH_INCLUDE=-I$(FOLDER_INCLUDE)
 PATH_LIB=-L$(FOLDER_LIB)
 
 # Link Libs
-LIBS=-lfaasm -lm $(LIBS_ZLIB) $(LIBS_BZLIB)
+LIBS=-lfaasm -lemulator -lm $(LIBS_ZLIB) $(LIBS_BZLIB)
 ifeq ($(WASM_BUILD), 1)
 else
   # Include pthread in native

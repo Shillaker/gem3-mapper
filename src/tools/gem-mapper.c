@@ -33,6 +33,8 @@
 #include "mapper/mapper_profile_cuda.h"
 #include "tools/interface/mapper_arguments.h"
 
+#include <faasm/faasm.h>
+
 /*
  * Version
  */
@@ -179,7 +181,7 @@ void gem_mapper_print_profile(mapper_parameters_t* const parameters) {
 /*
  * Main
  */
-int main(int argc,char** argv) {
+FAASM_MAIN_FUNC() {
   // Parsing command-line options
   mapper_parameters_t parameters;
   mapper_parameters_set_defaults(&parameters); // Set defaults
