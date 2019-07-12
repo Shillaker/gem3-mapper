@@ -187,9 +187,12 @@ FAASM_MAIN_FUNC() {
   mapper_parameters_set_defaults(&parameters); // Set defaults
 
   // Fake command-line arguments here
-  int argc = 1;
+  int argc = 7;
   char* argv[] = {
-      "gem-mapper.c",
+      "foobar",
+      "-I", "/usr/local/code/gem3-mapper/data/human_c_20_idx.gem",
+      "-i", "/usr/local/code/gem3-mapper/data/reads_1.fq",
+      "-o", "/usr/local/code/gem3-mapper/data/my_results.sam"
   };
   gem_mapper_parse_arguments(argc,argv,&parameters,gem_version);
 

@@ -12,6 +12,12 @@ GENOMES = {
     },
     "puffer": {
         "url": "ftp://ftp-trace.ncbi.nih.gov/genomes/genbank/vertebrate_other/Tetraodon_nigroviridis/representative/GCA_000180735.1_ASM18073v1/GCA_000180735.1_ASM18073v1_genomic.fna.gz",
+    },
+    "human-c-1": {
+        "url": "ftp://ftp.ensembl.org/pub/release-97/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.1.fa.gz",
+    },
+    "human-c-20": {
+        "url": "ftp://ftp.ensembl.org/pub/release-97/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.20.fa.gz"
     }
 }
 

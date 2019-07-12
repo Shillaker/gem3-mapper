@@ -173,6 +173,7 @@ FAASM_FUNC(mapper_se_thread, 1) {
   int idx = read_faasm_func_input();
   mapper_search_t *mapper_search = read_mapper_search_from_state(idx);
 
+  printf("Mapper thread %i (%i)\n", idx, mapper_search->thread_id);
   // GEM-thread error handler
   gem_thread_register_id(mapper_search->thread_id+1);
 

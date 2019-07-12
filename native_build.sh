@@ -8,4 +8,9 @@ export CPP=/usr/bin/clang-cpp
 export LINK=/usr/bin/clang++
 
 ./configure --enable-cuda=no
+
+# Release build
 make
+
+# Debug build
+# make debug

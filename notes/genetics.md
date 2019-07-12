@@ -3,7 +3,7 @@
 Some simple genetics notes for those who don't know what's going on.
 
 - **DNA** - carries genetic information in chains of molecules called nucleotides. The nucleotides in DNA contain one of four bases: adenine, thymine, cytosine and guanine. These are represented by their first letters, i.e. A, T, C, G).
-- **Gene** - a portion of DNA, roughly instructions for making what an organism needs
+- **Gene** - a portion of DNA, roughly an instruction for making what an organism needs
 - **Chromosome** - a bundle of genes. Humans have 46 chromosomes in 23 pairs
 - **Locus** - a fixed position on a chromosome, e.g. marking the position of a gene
 - **Protein** - chain of amino acids that forms the building blocks for life

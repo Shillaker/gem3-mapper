@@ -1,22 +1,24 @@
-# Notes
+# Usage Notes
 
-## Usage
-
-### Indexing (Native)
-
-You can download a genome with the `download_genome.py` script:
+Start off anything by running:
 
 ```
-python3 download_genome.py <genome_or_chromosome_name>
+source workon.sh
 ```
 
-You can then index it with
+## Data
+
+You can download a genome with the `download_genome.py` script, e.g.
 
 ```
-./bin/gem-indexer -i data/<your_genome> -o data/<your_index>.gem
+python3 download_genome.py human-c-20
 ```
 
-### Mapping
+You can then index it with:
+
+```
+./bin/gem-indexer -i data/Homo_sapiens.GRCh38.dna.chromosome.20.fa -o data/human_c_20_idx.gem
+```
 
 You can download reads to index using the `download_reads.py` script:
 
@@ -24,41 +26,40 @@ You can download reads to index using the `download_reads.py` script:
 python3 download_reads.py
 ```
 
-Picking a file, you can map it with:
+## Mapping
+
+To map a reads file you can do the following:
 
 ```
-./bin/gem-mapper -I data/<your_index>.gem -i data/<your_reads> -o data/<your_output>.sam
+./bin/gem-mapper -I data/human_c_20_idx.gem -i data/reads_1.fq -o data/my_output.sam
 ```
 
 You can change threads with `-t`. Adding `-t 1` can be useful for debugging.
 
-### WASM
+## WASM
 
 TBC
 
-
-## Data
+## Misc
 
 Lots of animal genomes at [this FTP server](ftp://ftp-trace.ncbi.nih.gov/genomes/).
 
 See the readme for the file layout. Can add more in the `download_genome.py` script.
 
-## Building
+This page also has stuff: https://www.ensembl.org/Homo_sapiens/Info/Index (good for individual chromosomes).
 
-### Native
+# Building
 
-To run locally for testing things out:
+## Native
+
+To run locally:
 
 ```
 # Native build
-./configure --enable-cuda=no
-make
-
-# Debug build
-make debug
+./native_build.sh
 ```
 
-### WASM
+## WASM
 
 To build to WASM for running on Faasm:
 
