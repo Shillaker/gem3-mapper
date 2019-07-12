@@ -48,7 +48,7 @@
  * Error Report
  */
 mapper_search_t* g_mapper_searches; // Global searches on going
-// pthread_mutex_t mapper_error_report_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mapper_error_report_mutex = PTHREAD_MUTEX_INITIALIZER;
 void mapper_error_report_cmd(
     FILE* stream,
     mapper_parameters_t* const mapper_parameters) {
@@ -245,7 +245,9 @@ FAASM_FUNC(mapper_se_thread, 1) {
   archive_search_delete(archive_search);
   archive_search_handlers_delete(archive_search_handlers);
   mapper_io_handler_delete(mapper_io_handler);
-  // pthread_exit(0);
+  pthread_exit(0);
+
+  free(mapper_search);
 }
 
 /*
@@ -342,6 +344,8 @@ FAASM_FUNC(mapper_pe_thread, 2) {
   paired_matches_delete(paired_matches);
   archive_search_handlers_delete(archive_search_handlers);
   mapper_io_handler_delete(mapper_io_handler);
+  pthread_exit(0);
+  free(mapper_search);
 }
 
 /*
