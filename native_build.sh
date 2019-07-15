@@ -10,7 +10,7 @@ export LINK=/usr/bin/clang++
 ./configure --enable-cuda=no
 
 # Release build
-make
+# make
 
 # Debug build
-# make debug
+make debug

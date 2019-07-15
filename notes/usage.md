@@ -38,7 +38,7 @@ You can change threads with `-t`. Adding `-t 1` can be useful for debugging.
 
 ## WASM
 
-TBC
+Once you've built and uploaded the function you can invoke it as normal (user is `gene` and function is called `mapper`).
 
 ## Misc
 
@@ -61,11 +61,17 @@ To run locally:
 
 ## WASM
 
-To build to WASM for running on Faasm:
+To build to WASM and upload to Faasm:
 
 ```
-# WASM build
+# Set up wasm symlink for filesystem (debug)
+./wasm_filesystem.sh
+
+# Make clean essential if you've been running native builds
+make clean
+
 ./wasm_build.sh
+./wasm_upload.sh
 ```
 
 ## CLion
