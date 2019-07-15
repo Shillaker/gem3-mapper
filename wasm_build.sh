@@ -20,7 +20,7 @@ export CXX="${EMCC_BIN}/wasm32-clang++ ${CPPFLAGS}"
 export AR=${EMCC_BIN}/llvm-ar
 export RANLIB=${EMCC_BIN}/llvm-ranlib
 export SYSROOT=${EMCC_ROOT}/sysroot
-export LDSHARED=${EMCC_BIN}/wasm-ld
+export LDSHARED="${EMCC_BIN}/wasm-ld"
 
 export WASM_BUILD=1
 
