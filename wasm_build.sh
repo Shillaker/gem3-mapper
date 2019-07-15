@@ -16,12 +16,14 @@ export CFLAGS="--sysroot=${WASM_SYSROOT}"
 export CPPFLAGS="${CFLAGS} -DHAVE_UNSETENV=1 -DHAVE_PUTENV=1 -DHAVE_TIMEGM=1 -DHAVE_FORK=1"
 
 export CC="${EMCC_BIN}/wasm32-clang ${CFLAGS}"
-export CXX=${EMCC_BIN}/wasm32-clang++
+export CXX="${EMCC_BIN}/wasm32-clang++ ${CPPFLAGS}"
 export AR=${EMCC_BIN}/llvm-ar
 export RANLIB=${EMCC_BIN}/llvm-ranlib
 export SYSROOT=${EMCC_ROOT}/sysroot
 export LDSHARED=${EMCC_BIN}/wasm-ld
 
-WASM_BUILD=1 ./configure --enable-cuda=no --disable-lto --without-tests --host=${WASM_TRIPLE} --build=${WASM_BUILD_TYPE}
+export WASM_BUILD=1
+
+./configure --enable-cuda=no --disable-lto --without-tests --host=${WASM_TRIPLE} --build=${WASM_BUILD_TYPE}
 
 make
