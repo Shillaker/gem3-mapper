@@ -173,7 +173,6 @@ FAASM_FUNC(mapper_se_thread, 1) {
   int idx = read_faasm_func_input();
   mapper_search_t *mapper_search = read_mapper_search_from_state(idx);
 
-  printf("Mapper thread %i (%i)\n", idx, mapper_search->thread_id);
   // GEM-thread error handler
   gem_thread_register_id(mapper_search->thread_id+1);
 
@@ -422,8 +421,9 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
 
     write_mapper_search_to_state(&ms, i);
 
-    // Chain function
-    int faasmCallId = faasmChainThis(faasmFuncIdx);
+    // Chain function with index as input data
+    unsigned char *inputData = (unsigned char*) &i;
+    int faasmCallId = faasmChainThisInput(faasmFuncIdx, inputData, sizeof(int));
     faasmCallIds[i] = faasmCallId;
   }
   // Join all threads
