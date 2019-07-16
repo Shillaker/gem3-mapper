@@ -169,14 +169,17 @@ int read_faasm_func_input() {
  * SE Mapper
  */
 FAASM_FUNC(mapper_se_thread, 1) {
+  printf("Starting mapper_se_thread \n");
   // Read input to see which function this is
   int idx = read_faasm_func_input();
   mapper_search_t *mapper_search = read_mapper_search_from_state(idx);
 
   // GEM-thread error handler
-  gem_thread_register_id(mapper_search->thread_id+1);
+  // Apparently only used for profiling so can ignore
+  // gem_thread_register_id(mapper_search->thread_id+1);
 
   // Parameters
+  printf("Preparing parameters\n");
   mapper_parameters_t* const parameters = mapper_search->mapper_parameters;
   search_parameters_t* const search_parameters = &mapper_search->mapper_parameters->search_parameters;
   archive_t* const archive = parameters->archive;
@@ -187,11 +190,13 @@ FAASM_FUNC(mapper_se_thread, 1) {
   sequence_t* sequence;
 
   // Init search structures
+  printf("Init search structures \n");
   archive_search_handlers = archive_search_handlers_new(archive);
   archive_search_se_new(search_parameters,false,&archive_search);
   matches = matches_new();
 
   // Init I/O handler
+  printf("Init I/O handler \n");
   mapper_io_handler = mapper_io_handler_new_se(
       parameters,parameters->io.input_buffer_size,
       archive_search_handlers->mm_allocator);
@@ -201,6 +206,7 @@ FAASM_FUNC(mapper_se_thread, 1) {
   mapper_search->sequence_end1 = &sequence;
 
   // FASTA/FASTQ reading loop
+  printf("FASTA/ FASTQ reading loop \n");
   uint64_t reads_processed = 0;
   while (mapper_read_sequence(mapper_io_handler,true,&sequence)) {
 //    // DEBUG
@@ -209,6 +215,7 @@ FAASM_FUNC(mapper_se_thread, 1) {
 //    }
 
     // Prepare Search
+    printf("Prepare search\n");
     archive_search_handlers_prepare_se(archive_search,sequence,archive_search_handlers);
 
     // Search into the archive
@@ -217,15 +224,18 @@ FAASM_FUNC(mapper_se_thread, 1) {
     TIMER_RESTART(&timer); archive_search_se(archive_search,matches); TIMER_STOP(&timer);
     fprintf(stderr,"Done %s in %2.4f ms.\n",sequence->tag.buffer,TIMER_GET_TOTAL_MS(&timer));
 #else
+    printf("Archive_search_se\n");
     archive_search_se(archive_search,matches);
 #endif
 
     // Output matches
+    printf("Output matches\n");
     mapper_io_handler_output_matches(mapper_io_handler,
         archive_search,matches,mapper_search->mapping_stats);
 
     // Update processed
     if (++reads_processed == parameters->io.mapper_ticker_step) {
+      printf("Step ticker mutex with %i reads \n", reads_processed);
       ticker_update_mutex(mapper_search->ticker,reads_processed);
       reads_processed=0;
     }
@@ -238,7 +248,9 @@ FAASM_FUNC(mapper_se_thread, 1) {
     matches_clear(matches);
   }
   // Update processed
+  printf("Updating ticker mutex with %i reads \n", reads_processed);
   ticker_update_mutex(mapper_search->ticker,reads_processed);
+
   // Clean up
   matches_delete(matches);
   archive_search_delete(archive_search);
@@ -253,6 +265,7 @@ FAASM_FUNC(mapper_se_thread, 1) {
  * PE Mapper
  */
 FAASM_FUNC(mapper_pe_thread, 2) {
+  printf("Starting mapper_pe_thread\n");
   // Read input to see which function this is
   int idx = read_faasm_func_input();
   mapper_search_t *mapper_search = read_mapper_search_from_state(idx);
@@ -429,6 +442,7 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
 
     printf("Invoked Faasm call %i\n", faasmCallId);
   }
+
   // Join all threads
   for (i=0;i<num_threads;++i) {
     faasmAwaitCall(faasmCallIds[i]);
