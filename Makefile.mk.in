@@ -45,15 +45,22 @@ AR=ar
 ###############################################################################
 
 # Folders
-FOLDER_BIN=$(ROOT_PATH)/bin
-FOLDER_BUILD=$(ROOT_PATH)/build
+ifeq ($(WASM_BUILD), 1)
+    FOLDER_BUILD=$(ROOT_PATH)/wasm_build
+    FOLDER_RESOURCES_BUILD=$(ROOT_PATH)/resources/wasm_build
+    FOLDER_GEMGPU_BUILD=$(ROOT_PATH)/resources/gpu_modules/wasm_build
+    FOLDER_BIN=$(ROOT_PATH)/wasm_bin
+else
+    FOLDER_BUILD=$(ROOT_PATH)/build
+    FOLDER_RESOURCES_BUILD=$(ROOT_PATH)/resources/build
+    FOLDER_GEMGPU_BUILD=$(ROOT_PATH)/resources/gpu_modules/build
+    FOLDER_BIN=$(ROOT_PATH)/bin
+endif
+
 FOLDER_DATASETS=$(ROOT_PATH)/datasets
 FOLDER_INCLUDE=$(ROOT_PATH)/include
 FOLDER_LIB=$(ROOT_PATH)/lib
 FOLDER_RESOURCES=$(ROOT_PATH)/resources
-FOLDER_RESOURCES_BUILD=$(ROOT_PATH)/resources/build
-
-FOLDER_GEMGPU_BUILD=$(ROOT_PATH)/resources/gpu_modules/build
 
 FOLDER_RESOURCES_INCLUDE=$(ROOT_PATH)/resources/include
 FOLDER_SOURCE=$(ROOT_PATH)/src

@@ -2,6 +2,9 @@ Makefile.mk
 .project
 .cproject
 
+wasm_bin/
+wasm_build/
+
 bin/
 
 # Genomics data

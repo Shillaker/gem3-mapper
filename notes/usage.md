@@ -50,6 +50,8 @@ This page also has stuff: https://www.ensembl.org/Homo_sapiens/Info/Index (good 
 
 # Building
 
+**Note: if building native and wasm in the same directory, be sure to clean when switching**
+
 ## Native
 
 To run locally:

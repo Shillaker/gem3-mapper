@@ -410,6 +410,7 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
   const uint64_t num_threads = mapper_parameters->system.num_threads;
   int *faasmCallIds = malloc(num_threads * sizeof(int));
 
+  printf("Spawning %i threads\n", num_threads);
   for (i=0;i<num_threads;++i) {
     // Set up worker params
     mapper_search_t ms;
@@ -425,6 +426,8 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
     unsigned char *inputData = (unsigned char*) &i;
     int faasmCallId = faasmChainThisInput(faasmFuncIdx, inputData, sizeof(int));
     faasmCallIds[i] = faasmCallId;
+
+    printf("Invoked Faasm call %i\n", faasmCallId);
   }
   // Join all threads
   for (i=0;i<num_threads;++i) {
