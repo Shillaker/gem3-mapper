@@ -141,24 +141,6 @@ void mapper_error_report(FILE* stream) {
   }
 }
 
-
-void write_mapper_search_to_state(mapper_search_t *ms, int idx) {
-    char state_key[18];
-    snprintf(state_key, 18, "mapper_search_%d", idx);
-    size_t n_bytes = sizeof(mapper_search_t);
-    faasmWriteState(state_key, (unsigned char *)ms, n_bytes, 0);
-}
-
-mapper_search_t* read_mapper_search_from_state(int idx) {
-    char state_key[18];
-    snprintf(state_key, 18, "mapper_search_%d", idx);
-    size_t n_bytes = sizeof(mapper_search_t);
-
-    mapper_search_t *ms = (mapper_search_t*) malloc(n_bytes);
-    faasmReadState(state_key, (unsigned char *)ms, n_bytes, 0);
-    return ms;
-}
-
 int read_faasm_func_input() {
     int res = 0;
     faasmGetInput((unsigned char*)&res, sizeof(int));
@@ -168,12 +150,7 @@ int read_faasm_func_input() {
 /*
  * SE Mapper
  */
-FAASM_FUNC(mapper_se_thread, 1) {
-  printf("Starting mapper_se_thread \n");
-  // Read input to see which function this is
-  int idx = read_faasm_func_input();
-  mapper_search_t *mapper_search = read_mapper_search_from_state(idx);
-
+void mapper_se_thread(mapper_search_t *mapper_search) {
   // GEM-thread error handler
   // Apparently only used for profiling so can ignore
   // gem_thread_register_id(mapper_search->thread_id+1);
@@ -264,12 +241,7 @@ FAASM_FUNC(mapper_se_thread, 1) {
 /*
  * PE Mapper
  */
-FAASM_FUNC(mapper_pe_thread, 2) {
-  printf("Starting mapper_pe_thread\n");
-  // Read input to see which function this is
-  int idx = read_faasm_func_input();
-  mapper_search_t *mapper_search = read_mapper_search_from_state(idx);
-
+void mapper_pe_thread(mapper_search_t *mapper_search) {
   // GEM-thread error handler
   gem_thread_register_id(mapper_search->thread_id+1);
 
@@ -418,35 +390,16 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
 
   PROFILE_VTUNE_START(); // Vtune
 
-  // Allocate per thread mapping stats
-  uint64_t i;
-  const uint64_t num_threads = mapper_parameters->system.num_threads;
-  int *faasmCallIds = malloc(num_threads * sizeof(int));
+  // Set up worker params (only have one worker)
+  mapper_search_t ms;
+  ms.thread_id = 1;
+  ms.thread_data = mm_alloc(pthread_t);
+  ms.mapper_parameters = mapper_parameters;
+  ms.ticker = &ticker;
+  ms.mapping_stats = NULL;
 
-  printf("Spawning %i threads\n", num_threads);
-  for (i=0;i<num_threads;++i) {
-    // Set up worker params
-    mapper_search_t ms;
-    ms.thread_id = i;
-    ms.thread_data = mm_alloc(pthread_t);
-    ms.mapper_parameters = mapper_parameters;
-    ms.ticker = &ticker;
-    ms.mapping_stats = NULL;
-
-    write_mapper_search_to_state(&ms, i);
-
-    // Chain function with index as input data
-    unsigned char *inputData = (unsigned char*) &i;
-    int faasmCallId = faasmChainThisInput(faasmFuncIdx, inputData, sizeof(int));
-    faasmCallIds[i] = faasmCallId;
-
-    printf("Invoked Faasm call %i\n", faasmCallId);
-  }
-
-  // Join all threads
-  for (i=0;i<num_threads;++i) {
-    faasmAwaitCall(faasmCallIds[i]);
-  }
+  // Call function to do work (this is where it used to be threaded)
+  mapper_se_thread(&ms);
 
   PROFILE_VTUNE_STOP(); // Vtune
   ticker_finish(&ticker);
@@ -454,7 +407,7 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
   PROF_STOP(GP_MAPPER_MAPPING);
 	// Merge report stats
 	if (mstats) {
-		 merge_mapping_stats(mapper_parameters->global_mapping_stats,mstats,num_threads);
+		 merge_mapping_stats(mapper_parameters->global_mapping_stats,mstats,1);
 		 mm_free(mstats);
 	}
   // Clean up

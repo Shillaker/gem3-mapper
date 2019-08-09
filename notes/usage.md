@@ -1,5 +1,7 @@
 # Usage Notes
 
+Need to make sure Faasm libraries are built and set up on system (see Faasm repo for details).
+
 Start off anything by running:
 
 ```
@@ -71,7 +73,9 @@ To build to WASM and upload to Faasm:
 
 # Make clean essential if you've been running native builds
 make clean
+./wasm_clean.sh
 
+# Run the build and upload
 ./wasm_build.sh
 ./wasm_upload.sh
 ```
