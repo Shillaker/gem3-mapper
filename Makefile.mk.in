@@ -208,6 +208,9 @@ LIBS=-lfaasm -lm $(LIBS_ZLIB) $(LIBS_BZLIB)
 ifeq ($(WASM_BUILD), 1)
   # WASM-specific malloc
   LIBS+=-ldlmalloc
+
+  # WASM-specific link options
+  FLAGS_LINK+=-Xlinker --export=main -Xlinker --export=_faasm_zygote
 else
   # Include pthread in native
   LIBS+=-lpthread -lemulator
