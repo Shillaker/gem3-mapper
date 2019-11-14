@@ -3,7 +3,7 @@
 set -e
 
 THIS_DIR=$(dirname $(readlink -f $0))
-PROJ_ROOT=${THIS_DIR}/..
+PROJ_ROOT=${THIS_DIR}/../..
 FAASM_TOOLCHAIN=${PROJ_ROOT}/toolchain
 
 source ${FAASM_TOOLCHAIN}/env.sh
@@ -31,3 +31,4 @@ export WASM_BUILD=1
 ./configure --enable-cuda=no --disable-lto --without-tests --host=${WASM_HOST} --build=${WASM_BUILD}
 
 make
+
