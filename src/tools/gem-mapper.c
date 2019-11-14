@@ -190,14 +190,15 @@ FAASM_MAIN_FUNC() {
   int argc = 7;
   char* argv[] = {
       "foobar",
-      "-I", "faasm://genomics/human_c_20_idx.gem",
+      "-I", "faasm://genomics/human_c_20_idx.gem.gem",
       "-i", "faasm://genomics/reads_1.fq",
-      "-o", "/tmp/genomics/results.sam"
+      "-o", "/tmp/genomics_results.sam"
   };
 
   gem_mapper_parse_arguments(argc,argv,&parameters,gem_version);
 
   // Runtime setup
+  printf("Setting up runtime\n");
   const mapper_parameters_cuda_t* const cuda = &parameters.cuda;
   gruntime_init(parameters.system.num_threads+1,parameters.system.tmp_folder);
   PROFILE_START(GP_MAPPER_ALL,PHIGH);
@@ -216,6 +217,7 @@ FAASM_MAIN_FUNC() {
   }
 
   // Launch mapper
+  printf("Launching mapper\n");
   if (!cuda->gpu_enabled) {
     switch (parameters.mapper_type) {
       case mapper_se:
@@ -252,7 +254,12 @@ FAASM_MAIN_FUNC() {
      output_mapping_stats(&parameters,parameters.global_mapping_stats);
   }
 
-  // CleanUP
+  // Write results to state
+  const char* output_key = "mapper_out";
+  faasmWriteStateFromFile(output_key, "/tmp/genomics_results.sam");
+
+  // Clean-up
+  printf("Cleaning up\n");
   archive_delete(parameters.archive); // Delete archive
   gem_mapper_close_input(&parameters); // Close I/O files
   gem_mapper_close_output(&parameters); // Close I/O files
@@ -264,10 +271,6 @@ FAASM_MAIN_FUNC() {
   gem_cond_log(parameters.misc.verbose_user,
       "[GEMMapper terminated successfully in %"PRIu64"s. (+%"PRIu64"s. loading)]\n",
       (uint64_t)BOUNDED_SUBTRACTION(mapper_time_sec,loading_time_sec,0),loading_time_sec);
-
-  // Write results to state
-  const char* output_key = "mapper_out";
-  faasmWriteStateFromFile(output_key, "/tmp/genomics/results.sam");
 
   // Done!
   return 0;

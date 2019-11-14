@@ -192,7 +192,6 @@ void mapper_se_thread(mapper_search_t *mapper_search) {
 //    }
 
     // Prepare Search
-    printf("Prepare search\n");
     archive_search_handlers_prepare_se(archive_search,sequence,archive_search_handlers);
 
     // Search into the archive
@@ -201,12 +200,10 @@ void mapper_se_thread(mapper_search_t *mapper_search) {
     TIMER_RESTART(&timer); archive_search_se(archive_search,matches); TIMER_STOP(&timer);
     fprintf(stderr,"Done %s in %2.4f ms.\n",sequence->tag.buffer,TIMER_GET_TOTAL_MS(&timer));
 #else
-    printf("Archive_search_se\n");
     archive_search_se(archive_search,matches);
 #endif
 
     // Output matches
-    printf("Output matches\n");
     mapper_io_handler_output_matches(mapper_io_handler,
         archive_search,matches,mapper_search->mapping_stats);
 
@@ -233,7 +230,9 @@ void mapper_se_thread(mapper_search_t *mapper_search) {
   archive_search_delete(archive_search);
   archive_search_handlers_delete(archive_search_handlers);
   mapper_io_handler_delete(mapper_io_handler);
-  pthread_exit(0);
+
+  // Running single threaded so we ignore this
+  // pthread_exit(0);
 
   free(mapper_search);
 }
