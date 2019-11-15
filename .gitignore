@@ -8,6 +8,7 @@ wasm_build/
 bin/
 
 # Genomics data
+*.tmp
 *.fasta
 *.fa
 *.fq
