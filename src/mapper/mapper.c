@@ -141,12 +141,6 @@ void mapper_error_report(FILE* stream) {
   }
 }
 
-int read_faasm_func_input() {
-    int res = 0;
-    faasmGetInput((unsigned char*)&res, sizeof(int));
-    return res;
-}
-
 /*
  * SE Mapper
  */
@@ -380,13 +374,7 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
   PROF_START(GP_MAPPER_MAPPING);
 
   // pthread_handler_t mapper_thread;
-  int faasmFuncIdx;
-  if (paired_end) {
-    faasmFuncIdx = 2;
-  } else {
-    faasmFuncIdx = 1;
-  }
-
+  
   PROFILE_VTUNE_START(); // Vtune
 
   // Set up worker params (only have one worker)

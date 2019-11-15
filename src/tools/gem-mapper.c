@@ -178,21 +178,74 @@ void gem_mapper_print_profile(mapper_parameters_t* const parameters) {
     }
   }
 }
+
+#define N_READ_CHUNKS 10
+#define N_INDEX_CHUNKS 24
+#define INPUT_SIZE 2 * sizeof(int)
+
 /*
  * Main
  */
 FAASM_MAIN_FUNC() {
-  // Parsing command-line options
+    int nCalls = N_READ_CHUNKS * N_INDEX_CHUNKS;
+    unsigned int callIds[nCalls];
+
+    // Spawn a function for each permutation of read chunk and index chunk
+    int callIdx = 0;
+    for(int r = 0; i < N_READ_CHUNKS; r++) {
+        for(int i = 0; i < N_INDEX_CHUNKS; i++) {
+            int input[2] = {r, i};
+
+            size_t inputSize = INPUT_SIZE;
+            unsigned char* inputBytes = (unsigned char*) input;
+            unsigned int callId = faasmChainThisInput(1, inputBytes, inputSize);
+
+            callIds[callIdx] = callId;
+            callIdx++;
+        }
+    }
+
+    // Await all finishing
+    for(int i = 0; i < callIdx; i++) {
+        faasmAwaitCall(callIds[i]);
+    }
+
+    // TODO - aggregating
+
+    return 0;
+}
+
+/*
+ * Worker
+ */
+FAASM_FUNC(1) {
   mapper_parameters_t parameters;
   mapper_parameters_set_defaults(&parameters); // Set defaults
 
-  // Fake command-line arguments here
+  // Get the input
+  unsigned char* inputBuffer[INPUT_SIZE];
+  faasmGetInput(inputBuffer, INPUT_SIZE);
+  int* input = (int*) inputBuffer;
+  int readIdx = input[0];
+  int indexIdx = input[1];
+
+  // Build file names
+  char* readFile[35];
+  char* indexFile[35];
+  char* outputFile[30];
+  char* outputKey[20];
+  sprintf(readFile, "faasm://genomics/reads_%i.fq", readIdx);
+  sprintf(indexFile, "faasm://genomics/index_%i.gem", indexIdx);
+  sprintf(outputFile, "/tmp/map_out_%i_%i.sam", readIdx, indexIdx);
+  sprintf(outputKey, "map_out_%i_%i", readIdx, indexIdx);
+
+  // Build effective command-line arguments
   int argc = 7;
   char* argv[] = {
-      "foobar",
-      "-I", "faasm://genomics/human_c_20_idx.gem.gem",
-      "-i", "faasm://genomics/reads_1.fq",
-      "-o", "/tmp/genomics_results.sam"
+      "blah",
+      "-I", indexFile,
+      "-i", readFile,
+      "-o", outputFile
   };
 
   gem_mapper_parse_arguments(argc,argv,&parameters,gem_version);
@@ -255,8 +308,7 @@ FAASM_MAIN_FUNC() {
   }
 
   // Write results to state
-  const char* output_key = "mapper_out";
-  faasmWriteStateFromFile(output_key, "/tmp/genomics_results.sam");
+  faasmWriteStateFromFile(outputKey, outputFile);
 
   // Clean-up
   printf("Cleaning up\n");
@@ -266,11 +318,11 @@ FAASM_MAIN_FUNC() {
   gruntime_destroy();
 
   // Display end banner
-  const uint64_t mapper_time_sec = (uint64_t)TIMER_GET_TOTAL_S(&parameters.mapper_time);
-  const uint64_t loading_time_sec = (uint64_t)TIMER_GET_TOTAL_S(&parameters.loading_time);
-  gem_cond_log(parameters.misc.verbose_user,
-      "[GEMMapper terminated successfully in %"PRIu64"s. (+%"PRIu64"s. loading)]\n",
-      (uint64_t)BOUNDED_SUBTRACTION(mapper_time_sec,loading_time_sec,0),loading_time_sec);
+  // const uint64_t mapper_time_sec = (uint64_t)TIMER_GET_TOTAL_S(&parameters.mapper_time);
+  // const uint64_t loading_time_sec = (uint64_t)TIMER_GET_TOTAL_S(&parameters.loading_time);
+  // gem_cond_log(parameters.misc.verbose_user,
+  //     "[GEMMapper terminated successfully in %"PRIu64"s. (+%"PRIu64"s. loading)]\n",
+  //     (uint64_t)BOUNDED_SUBTRACTION(mapper_time_sec,loading_time_sec,0),loading_time_sec);
 
   // Done!
   return 0;
