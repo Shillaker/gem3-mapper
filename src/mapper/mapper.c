@@ -146,7 +146,6 @@ void mapper_error_report(FILE* stream) {
  */
 void mapper_se_thread(mapper_search_t *mapper_search) {
   // GEM-thread error handler
-  // Apparently only used for profiling so can ignore
   // gem_thread_register_id(mapper_search->thread_id+1);
 
   // Parameters
@@ -203,7 +202,6 @@ void mapper_se_thread(mapper_search_t *mapper_search) {
 
     // Update processed
     if (++reads_processed == parameters->io.mapper_ticker_step) {
-      printf("Step ticker mutex with %i reads \n", reads_processed);
       ticker_update_mutex(mapper_search->ticker,reads_processed);
       reads_processed=0;
     }
@@ -224,8 +222,6 @@ void mapper_se_thread(mapper_search_t *mapper_search) {
   archive_search_delete(archive_search);
   archive_search_handlers_delete(archive_search_handlers);
   mapper_io_handler_delete(mapper_io_handler);
-
-  // Running single threaded so we ignore this
   // pthread_exit(0);
 
   free(mapper_search);
@@ -320,7 +316,7 @@ void mapper_pe_thread(mapper_search_t *mapper_search) {
   paired_matches_delete(paired_matches);
   archive_search_handlers_delete(archive_search_handlers);
   mapper_io_handler_delete(mapper_io_handler);
-  pthread_exit(0);
+  // pthread_exit(0);
   free(mapper_search);
 }
 
@@ -374,7 +370,7 @@ void mapper_run(mapper_parameters_t* const mapper_parameters,const bool paired_e
   PROF_START(GP_MAPPER_MAPPING);
 
   // pthread_handler_t mapper_thread;
-  
+
   PROFILE_VTUNE_START(); // Vtune
 
   // Set up worker params (only have one worker)
