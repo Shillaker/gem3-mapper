@@ -179,55 +179,29 @@ void gem_mapper_print_profile(mapper_parameters_t* const parameters) {
   }
 }
 
-#define N_READ_CHUNKS 10
-#define N_INDEX_CHUNKS 24
-#define INPUT_SIZE 2 * sizeof(int)
-
 /*
- * Main
+ * Distributed worker
  */
 FAASM_MAIN_FUNC() {
-    int nCalls = N_READ_CHUNKS * N_INDEX_CHUNKS;
-    unsigned int callIds[nCalls];
-
-    // Spawn a function for each permutation of read chunk and index chunk
-    int callIdx = 0;
-    for(int r = 0; i < N_READ_CHUNKS; r++) {
-        for(int i = 0; i < N_INDEX_CHUNKS; i++) {
-            int input[2] = {r, i};
-
-            size_t inputSize = INPUT_SIZE;
-            unsigned char* inputBytes = (unsigned char*) input;
-            unsigned int callId = faasmChainThisInput(1, inputBytes, inputSize);
-
-            callIds[callIdx] = callId;
-            callIdx++;
-        }
-    }
-
-    // Await all finishing
-    for(int i = 0; i < callIdx; i++) {
-        faasmAwaitCall(callIds[i]);
-    }
-
-    // TODO - aggregating
-
-    return 0;
-}
-
-/*
- * Worker
- */
-FAASM_FUNC(1) {
   mapper_parameters_t parameters;
   mapper_parameters_set_defaults(&parameters); // Set defaults
 
-  // Get the input
-  unsigned char* inputBuffer[INPUT_SIZE];
-  faasmGetInput(inputBuffer, INPUT_SIZE);
-  int* input = (int*) inputBuffer;
-  int readIdx = input[0];
-  int indexIdx = input[1];
+  long inputSize = faasmGetInputSize();
+
+  // Default values
+  int readIdx = 0;
+  int indexIdx = 0;
+
+  if(inputSize > 0) {
+      // Get the input
+      size_t inputSize = 2*sizeof(int);
+      unsigned char* inputBuffer[inputSize];
+      faasmGetInput(inputBuffer, inputSize);
+
+      int* input = (int*) inputBuffer;
+      readIdx = input[0];
+      indexIdx = input[1];
+  }
 
   // Build file names
   char* readFile[35];
