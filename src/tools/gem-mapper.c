@@ -183,17 +183,13 @@ void gem_mapper_print_profile(mapper_parameters_t* const parameters) {
  * Distributed worker
  */
 FAASM_MAIN_FUNC() {
-  mapper_parameters_t parameters;
-  mapper_parameters_set_defaults(&parameters); // Set defaults
-
+  // Read Faasm input with default values
   long inputSize = faasmGetInputSize();
-
-  // Default values
   int readIdx = 0;
   int indexIdx = 0;
 
+  // Parse input if present
   if(inputSize > 0) {
-      // Get the input
       size_t inputSize = 2*sizeof(int);
       unsigned char* inputBuffer[inputSize];
       faasmGetInput(inputBuffer, inputSize);
@@ -222,6 +218,9 @@ FAASM_MAIN_FUNC() {
       "-o", outputFile
   };
 
+  // Set up parameters
+  mapper_parameters_t parameters;
+  mapper_parameters_set_defaults(&parameters);
   gem_mapper_parse_arguments(argc,argv,&parameters,gem_version);
 
   // Runtime setup
