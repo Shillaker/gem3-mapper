@@ -290,7 +290,7 @@ FAASM_MAIN_FUNC() {
   const char* lengthsKey = "output_lengths";
   size_t totalLenghtsLen = nIndexChunks * sizeof(int);
   size_t thisOffset = indexIdx * sizeof(int);
-  faasmWriteStateOffset(lengthsKey, totalLenghtsLen, thisOffset, (unsigned char*) &bytesWritten, sizeof(int))
+  faasmWriteStateOffset(lengthsKey, totalLenghtsLen, thisOffset, (unsigned char*) &bytesWritten, sizeof(int));
 
   // Clean-up
   printf("Cleaning up\n");
