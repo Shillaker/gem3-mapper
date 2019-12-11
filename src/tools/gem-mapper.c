@@ -188,6 +188,9 @@ FAASM_MAIN_FUNC() {
   int readIdx = 0;
   int indexIdx = 0;
 
+  // This is hard-coded for the human genome
+  int nIndexChunks = 25;
+
   // Parse input if present
   if(inputSize > 0) {
       size_t inputSize = 2*sizeof(int);
@@ -281,7 +284,13 @@ FAASM_MAIN_FUNC() {
   }
 
   // Write results to state
-  faasmWriteStateFromFile(outputKey, outputFile);
+  int bytesWritten = (int) faasmWriteStateFromFile(outputKey, outputFile);
+
+  // Record how long this output was
+  const char* lengthsKey = "output_lengths";
+  size_t totalLenghtsLen = nIndexChunks * sizeof(int);
+  size_t thisOffset = indexIdx * sizeof(int);
+  faasmWriteStateOffset(lengthsKey, totalLenghtsLen, thisOffset, (unsigned char*) &bytesWritten, sizeof(int))
 
   // Clean-up
   printf("Cleaning up\n");
