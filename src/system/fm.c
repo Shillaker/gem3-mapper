@@ -216,29 +216,34 @@ fm_t* fm_open_file(char* const file_name,const fm_mode mode) {
   return file_manager;
 }
 fm_t* fm_open_popen(char* const file_name,const fm_mode mode) {
-  char *pmode[] = {"r","w","r+"};
-  // Allocate handler
-  fm_t* file_manager = mm_alloc(fm_t);
-  // File
-  file_manager->fd = 0;
-  file_manager->file = popen(file_name,pmode[mode]);
-  gem_cond_fatal_error(file_manager->file==NULL,FM_FDOPEN,file_name);
-#ifdef HAVE_BZLIB
-  file_manager->bz_file = NULL;
-#endif
-#ifdef HAVE_ZLIB
-  file_manager->gz_file = NULL;
-#endif
-  // Attributes
-  file_manager->mode = mode;
-  file_manager->file_name = strdup(file_name);
-  gem_cond_fatal_error(file_manager->file_name==NULL,STRDUP);
-  file_manager->file_size = UINT64_MAX;
-  file_manager->file_type = FM_POPEN;
-  // Initialize file manager
-  fm_initialize(file_manager);
-  // Return fm
-  return file_manager;
+  printf("fm_open_popen not supported");
+  exit(1);
+
+//  char *pmode[] = {"r","w","r+"};
+//  // Allocate handler
+//  fm_t* file_manager = mm_alloc(fm_t);
+//  // File
+//  file_manager->fd = 0;
+//  file_manager->file = popen(file_name,pmode[mode]);
+//  gem_cond_fatal_error(file_manager->file==NULL,FM_FDOPEN,file_name);
+//#ifdef HAVE_BZLIB
+//  file_manager->bz_file = NULL;
+//#endif
+//#ifdef HAVE_ZLIB
+//  file_manager->gz_file = NULL;
+//#endif
+//  // Attributes
+//  file_manager->mode = mode;
+//  file_manager->file_name = strdup(file_name);
+//  gem_cond_fatal_error(file_manager->file_name==NULL,STRDUP);
+//  file_manager->file_size = UINT64_MAX;
+//  file_manager->file_type = FM_POPEN;
+//  // Initialize file manager
+//  fm_initialize(file_manager);
+//  // Return fm
+//  return file_manager;
+
+  return NULL;
 }
 fm_t* fm_open_temp_file(void) {
   // Allocate handler
@@ -346,7 +351,9 @@ void fm_close(fm_t* const file_manager) {
       gem_cond_fatal_error(fclose(file_manager->file),FM_CLOSE,file_manager->file_name);
       break;
 	case FM_POPEN:
-      gem_cond_fatal_error(pclose(file_manager->file),FM_CLOSE,file_manager->file_name);
+      printf("FM_POPEN not supported");
+      exit(1);
+//      gem_cond_fatal_error(pclose(file_manager->file),FM_CLOSE,file_manager->file_name);
       break;	  
     case FM_REGULAR_FILE:
       gem_cond_fatal_error(fclose(file_manager->file),FM_CLOSE,file_manager->file_name);

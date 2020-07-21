@@ -26,6 +26,8 @@
 #include "fm_index/sa_builder/sa_builder.h"
 #include "stats/stats_vector.h"
 
+#include <byteswap.h>
+
 /*
  * Global
  */

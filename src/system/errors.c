@@ -74,14 +74,15 @@ void gem_error_signal_handler(int signal) {
   pthread_mutex_unlock(&gem_error_signal_handler_mutex);
 }
 void gem_handle_error_signals(void) {
-  struct sigaction error_signal_handler;
-  error_signal_handler.sa_handler = gem_error_signal_handler;
-  sigemptyset(&error_signal_handler.sa_mask);
-  error_signal_handler.sa_flags = 0;
-  sigaction(SIGBUS,&error_signal_handler,NULL);
-  sigaction(SIGSEGV,&error_signal_handler,NULL);
-  sigaction(SIGFPE,&error_signal_handler,NULL);
-  sigaction(SIGILL,&error_signal_handler,NULL);
+  printf("gem_handle_error_signals\n");
+//  struct sigaction error_signal_handler;
+//  error_signal_handler.sa_handler = gem_error_signal_handler;
+//  sigemptyset(&error_signal_handler.sa_mask);
+//  error_signal_handler.sa_flags = 0;
+//  sigaction(SIGBUS,&error_signal_handler,NULL);
+//  sigaction(SIGSEGV,&error_signal_handler,NULL);
+//  sigaction(SIGFPE,&error_signal_handler,NULL);
+//  sigaction(SIGILL,&error_signal_handler,NULL);
 }
 /*
  * Print ErrNo
