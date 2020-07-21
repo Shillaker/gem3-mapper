@@ -207,7 +207,7 @@ PATH_LIB=-L$(FOLDER_LIB)
 LIBS=-lfaasm -lm $(LIBS_ZLIB) $(LIBS_BZLIB)
 ifeq ($(WASM_BUILD), 1)
   # WASM-specific link options
-  FLAGS_LINK+=-Xlinker --export=main -Xlinker --export=_faasm_zygote
+  FLAGS_LINK+=$(WASM_FUNC_LDFLAGS)
 else
   # Include pthread in native
   LIBS+=-lpthread -lemulator
