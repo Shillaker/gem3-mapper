@@ -285,12 +285,7 @@ FAASM_MAIN_FUNC() {
 
   // Write results to state
   int bytesWritten = (int) faasmWriteStateFromFile(outputKey, outputFile);
-
-  // Record how long this output was
-  const char* lengthsKey = "output_lengths";
-  size_t totalLenghtsLen = nIndexChunks * sizeof(int);
-  size_t thisOffset = indexIdx * sizeof(int);
-  faasmWriteStateOffset(lengthsKey, totalLenghtsLen, thisOffset, (unsigned char*) &bytesWritten, sizeof(int));
+  printf("Wrote %i bytes of output to %s\n", bytesWritten, outputKey);
 
   // Clean-up
   printf("Cleaning up\n");
