@@ -224,7 +224,9 @@ void mapper_se_thread(mapper_search_t *mapper_search) {
   mapper_io_handler_delete(mapper_io_handler);
   // pthread_exit(0);
 
+#ifdef __wasm__
   free(mapper_search);
+#endif
 }
 
 /*
@@ -317,7 +319,10 @@ void mapper_pe_thread(mapper_search_t *mapper_search) {
   archive_search_handlers_delete(archive_search_handlers);
   mapper_io_handler_delete(mapper_io_handler);
   // pthread_exit(0);
+
+#ifdef __wasm__
   free(mapper_search);
+#endif
 }
 
 /*

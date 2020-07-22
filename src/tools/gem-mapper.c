@@ -186,16 +186,24 @@ void gem_mapper_print_profile(mapper_parameters_t* const parameters) {
  */
 FAASM_MAIN_FUNC() {
   // ----------------------------------------
-  // Special Faasm argc/ argv handling
+  // Special Faasm input handling
   // ----------------------------------------
 #ifdef __wasm__
-  if(faasm_argc != 3) {
-    printf("Expected 2 args (got %i)\n", faasm_argc);
-    return 1;
+  // Read Faasm input
+  long inputSize = faasmGetInputSize();
+  if(inputSize == 0) {
+    printf("Expected input of two ints, read idx and index idx\n");
+    exit(1);
   }
 
-  int readIdx = atoi(faasm_argv[1]);
-  int indexIdx = atoi(faasm_argv[2]);
+  // Parse input
+  size_t inputSize = 2 * sizeof(int);
+  unsigned char* inputBuffer[inputSize];
+  faasmGetInput(inputBuffer, inputSize);
+  int* input = (int*) inputBuffer;
+
+  int readIdx = input[0];
+  int indexIdx = input[1];
 
   // Build file names
   char* readFile[35];
