@@ -190,8 +190,8 @@ FAASM_MAIN_FUNC() {
   // ----------------------------------------
 #ifdef __wasm__
   // Read Faasm input
-  long inputSize = faasmGetInputSize();
-  if(inputSize == 0) {
+  long actualInputSize = faasmGetInputSize();
+  if(actualInputSize == 0) {
     printf("Expected input of two ints, read idx and index idx\n");
     exit(1);
   }
