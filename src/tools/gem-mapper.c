@@ -23,6 +23,8 @@
 
 #define REPORT_STATS
 
+#include <stdlib.h>
+
 #include "utils/essentials.h"
 #include "stats/report_stats.h"
 #include "mapper/mapper.h"
@@ -183,24 +185,17 @@ void gem_mapper_print_profile(mapper_parameters_t* const parameters) {
  * Distributed worker
  */
 FAASM_MAIN_FUNC() {
-  // Read Faasm input with default values
-  long inputSize = faasmGetInputSize();
-  int readIdx = 0;
-  int indexIdx = 0;
-
-  // This is hard-coded for the human genome
-  int nIndexChunks = 25;
-
-  // Parse input if present
-  if(inputSize > 0) {
-      size_t inputSize = 2*sizeof(int);
-      unsigned char* inputBuffer[inputSize];
-      faasmGetInput(inputBuffer, inputSize);
-
-      int* input = (int*) inputBuffer;
-      readIdx = input[0];
-      indexIdx = input[1];
+  // ----------------------------------------
+  // Special Faasm argc/ argv handling
+  // ----------------------------------------
+#ifdef __wasm__
+  if(faasm_argc != 3) {
+    printf("Expected 2 args (got %i)\n", faasm_argc);
+    return 1;
   }
+
+  int readIdx = atoi(faasm_argv[1]);
+  int indexIdx = atoi(faasm_argv[2]);
 
   // Build file names
   char* readFile[35];
@@ -220,6 +215,11 @@ FAASM_MAIN_FUNC() {
       "-i", readFile,
       "-o", outputFile
   };
+#else
+  // Use normal argc/ argv if not running in wasm
+  int argc = faasm_argc;
+  char** argv = faasm_argv;
+#endif
 
   // Set up parameters
   mapper_parameters_t parameters;
@@ -283,9 +283,11 @@ FAASM_MAIN_FUNC() {
      output_mapping_stats(&parameters,parameters.global_mapping_stats);
   }
 
+#ifdef __wasm__
   // Write results to state
   int bytesWritten = (int) faasmWriteStateFromFile(outputKey, outputFile);
   printf("Wrote %i bytes of output to %s\n", bytesWritten, outputKey);
+#endif
 
   // Clean-up
   printf("Cleaning up\n");
